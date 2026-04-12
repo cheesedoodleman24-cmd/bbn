@@ -14,6 +14,7 @@ local cHeld = false
 local outlineColor = Color3.fromRGB(0, 255, 255)
 
 local function applyGlow(object)
+    if not object or not object.Parent then return end
     local highlight = object:FindFirstChild("GenOutline")
     if not highlight then
         highlight = Instance.new("Highlight")
@@ -26,22 +27,27 @@ local function applyGlow(object)
     highlight.OutlineColor = outlineColor
 end
 
+local function refreshTargets()
+    local found = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
+            applyGlow(p.Character)
+            table.insert(found, p.Character)
+        end
+    end
+    for _, item in ipairs(workspace:GetDescendants()) do
+        if item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model")) then
+            applyGlow(item)
+            table.insert(found, item)
+        end
+    end
+    targets = found
+end
+
 task.spawn(function()
     while true do
-        local currentTargets = {}
-        local success, err = pcall(function()
-            for _, item in ipairs(game:GetDescendants()) do
-                local isGen = item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model"))
-                local isPlayer = item:IsA("Model") and Players:GetPlayerFromCharacter(item) and item ~= lp.Character
-                
-                if (isGen or isPlayer) and not item:IsDescendantOf(game:GetService("CoreGui")) then
-                    applyGlow(item)
-                    table.insert(currentTargets, item)
-                end
-            end
-        end)
-        if success then targets = currentTargets end
-        task.wait(1)
+        pcall(refreshTargets)
+        task.wait(5)
     end
 end)
 
@@ -54,11 +60,20 @@ UserInputService.InputBegan:Connect(function(input, processed)
 
     if cHeld then
         if input.KeyCode == Enum.KeyCode.R then outlineColor = Color3.fromRGB(255, 0, 0)
+        elseif input.KeyCode == Enum.KeyCode.O then outlineColor = Color3.fromRGB(255, 127, 0)
         elseif input.KeyCode == Enum.KeyCode.Y then outlineColor = Color3.fromRGB(255, 255, 0)
-        elseif input.KeyCode == Enum.KeyCode.W then outlineColor = Color3.fromRGB(255, 255, 255)
         elseif input.KeyCode == Enum.KeyCode.G then outlineColor = Color3.fromRGB(0, 255, 0)
         elseif input.KeyCode == Enum.KeyCode.B then outlineColor = Color3.fromRGB(0, 0, 255)
-        elseif input.KeyCode == Enum.KeyCode.P then outlineColor = Color3.fromRGB(128, 0, 128)
+        elseif input.KeyCode == Enum.KeyCode.P then outlineColor = Color3.fromRGB(127, 0, 255)
+        elseif input.KeyCode == Enum.KeyCode.M then outlineColor = Color3.fromRGB(255, 0, 255)
+        elseif input.KeyCode == Enum.KeyCode.N then outlineColor = Color3.fromRGB(0, 255, 255)
+        elseif input.KeyCode == Enum.KeyCode.W then outlineColor = Color3.fromRGB(255, 255, 255)
+        elseif input.KeyCode == Enum.KeyCode.K then outlineColor = Color3.fromRGB(0, 0, 0)
+        end
+        
+        for _, t in ipairs(targets) do
+            local h = t:FindFirstChild("GenOutline")
+            if h then h.OutlineColor = outlineColor end
         end
     end
 
@@ -98,12 +113,12 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 lockTarget = bestTarget
                 isLocked = true
             else
-                local ti = TweenInfo.new(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+                local ti = TweenInfo.new(1.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
                 
                 local connection
-                connection = RunService.Stepped:Connect(function()
-                    if not bestTarget or not bestTarget.Parent then
+                connection = RunService.Heartbeat:Connect(function()
+                    if not bestTarget or not bestTarget.Parent or not lp.Character or not hrp then
                         tween:Cancel()
                         connection:Disconnect()
                     end
