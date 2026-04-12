@@ -29,24 +29,26 @@ end
 
 local function refreshTargets()
     local found = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= lp and p.Character then
-            applyGlow(p.Character)
-            table.insert(found, p.Character)
+    local success, err = pcall(function()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= lp and p.Character then
+                applyGlow(p.Character)
+                table.insert(found, p.Character)
+            end
         end
-    end
-    for _, item in ipairs(workspace:GetDescendants()) do
-        if item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model")) then
-            applyGlow(item)
-            table.insert(found, item)
+        for _, item in ipairs(workspace:GetDescendants()) do
+            if item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model")) then
+                applyGlow(item)
+                table.insert(found, item)
+            end
         end
-    end
-    targets = found
+    end)
+    if success then targets = found end
 end
 
 task.spawn(function()
     while true do
-        pcall(refreshTargets)
+        refreshTargets()
         task.wait(5)
     end
 end)
@@ -115,7 +117,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 lockTarget = bestTarget
                 isLocked = true
             else
-                local ti = TweenInfo.new(2.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+                local distance = (hrp.Position - bestTarget.Position).Magnitude
+                local calculatedTime = math.clamp(distance / 150, 1.5, 5)
+                
+                local ti = TweenInfo.new(calculatedTime, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
                 
                 local connection
