@@ -29,26 +29,24 @@ end
 
 local function refreshTargets()
     local found = {}
-    local success, err = pcall(function()
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= lp and p.Character then
-                applyGlow(p.Character)
-                table.insert(found, p.Character)
-            end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
+            applyGlow(p.Character)
+            table.insert(found, p.Character)
         end
-        for _, item in ipairs(workspace:GetDescendants()) do
-            if item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model")) then
-                applyGlow(item)
-                table.insert(found, item)
-            end
+    end
+    for _, item in ipairs(workspace:GetDescendants()) do
+        if item.Name == "Generator" and (item:IsA("BasePart") or item:IsA("Model")) then
+            applyGlow(item)
+            table.insert(found, item)
         end
-    end)
-    if success then targets = found end
+    end
+    targets = found
 end
 
 task.spawn(function()
     while true do
-        refreshTargets()
+        pcall(refreshTargets)
         task.wait(5)
     end
 end)
@@ -74,10 +72,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
         end
         
         for _, t in ipairs(targets) do
-            if t and t.Parent then
-                local h = t:FindFirstChild("GenOutline")
-                if h then h.OutlineColor = outlineColor end
-            end
+            local h = t:FindFirstChild("GenOutline")
+            if h then h.OutlineColor = outlineColor end
         end
     end
 
@@ -117,10 +113,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 lockTarget = bestTarget
                 isLocked = true
             else
-                local distance = (hrp.Position - bestTarget.Position).Magnitude
-                local calculatedTime = math.clamp(distance / 150, 1.5, 5)
-                
-                local ti = TweenInfo.new(calculatedTime, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+                local ti = TweenInfo.new(1.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
                 
                 local connection
