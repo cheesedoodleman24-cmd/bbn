@@ -76,7 +76,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 lockTarget = bestTarget
                 isLocked = true
             else
-                local ti = TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+                local ti = TweenInfo.new(0.65, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
                 TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)}):Play()
             end
         end
