@@ -58,6 +58,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
         elseif input.KeyCode == Enum.KeyCode.W then outlineColor = Color3.fromRGB(255, 255, 255)
         elseif input.KeyCode == Enum.KeyCode.G then outlineColor = Color3.fromRGB(0, 255, 0)
         elseif input.KeyCode == Enum.KeyCode.B then outlineColor = Color3.fromRGB(0, 0, 255)
+        elseif input.KeyCode == Enum.KeyCode.P then outlineColor = Color3.fromRGB(128, 0, 128)
         end
     end
 
