@@ -12,7 +12,6 @@ local isLocked = false
 local lHeld = false
 local cHeld = false
 local outlineColor = Color3.fromRGB(0, 255, 255)
-local travelSpeed = 60
 
 local function applyGlow(object)
     if not object or not object.Parent then return end
@@ -73,8 +72,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
         end
         
         for _, t in ipairs(targets) do
-            local h = t:FindFirstChild("GenOutline")
-            if h then h.OutlineColor = outlineColor end
+            if t and t.Parent then
+                local h = t:FindFirstChild("GenOutline")
+                if h then h.OutlineColor = outlineColor end
+            end
         end
     end
 
@@ -110,18 +111,12 @@ UserInputService.InputBegan:Connect(function(input, processed)
 
         if bestTarget and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = lp.Character.HumanoidRootPart
-            local targetPos = bestTarget.Position + Vector3.new(0, 5, 0)
-
             if lHeld then
                 lockTarget = bestTarget
                 isLocked = true
             else
-                local distance = (hrp.Position - targetPos).Magnitude
-                local duration = math.clamp(distance / travelSpeed, 0.3, 2.5)
-                local ti = TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-                local targetCFrame = CFrame.new(targetPos) * hrp.CFrame.Rotation
-                
-                local tween = TweenService:Create(hrp, ti, {CFrame = targetCFrame})
+                local ti = TweenInfo.new(2.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+                local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
                 
                 local connection
                 connection = RunService.Heartbeat:Connect(function()
@@ -150,9 +145,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
     if isLocked and lockTarget and lockTarget.Parent and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = lp.Character.HumanoidRootPart
-        local goalCFrame = lockTarget.CFrame + Vector3.new(0, 5, 0)
-        hrp.CFrame = hrp.CFrame:Lerp(goalCFrame, 0.15)
+        lp.Character.HumanoidRootPart.CFrame = lockTarget.CFrame + Vector3.new(0, 5, 0)
     elseif isLocked and (not lockTarget or not lockTarget.Parent) then
         isLocked = false
         lockTarget = nil
