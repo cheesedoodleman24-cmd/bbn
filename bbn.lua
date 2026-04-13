@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
@@ -11,7 +10,7 @@ local lockTarget = nil
 local isLocked = false
 local lHeld = false
 local cHeld = false
-local tweenActive = true
+local tpActive = true
 local outlineColor = Color3.fromRGB(0, 255, 255)
 
 local function applyGlow(object)
@@ -56,7 +55,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     
     if input.KeyCode == Enum.KeyCode.One then
-        tweenActive = not tweenActive
+        tpActive = not tpActive
     end
 
     if input.KeyCode == Enum.KeyCode.C then
@@ -117,22 +116,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
             if lHeld then
                 lockTarget = bestTarget
                 isLocked = true
-            elseif tweenActive then
-                local ti = TweenInfo.new(1.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-                local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
-                
-                local connection
-                connection = RunService.Heartbeat:Connect(function()
-                    if not bestTarget or not bestTarget.Parent or not lp.Character or not hrp then
-                        tween:Cancel()
-                        connection:Disconnect()
-                    end
-                end)
-                
-                tween:Play()
-                tween.Completed:Connect(function()
-                    if connection then connection:Disconnect() end
-                end)
+            elseif tpActive then
+                hrp.CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)
             end
         end
     end
