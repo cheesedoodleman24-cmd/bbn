@@ -11,6 +11,7 @@ local lockTarget = nil
 local isLocked = false
 local lHeld = false
 local cHeld = false
+local tweenEnabled = true
 local outlineColor = Color3.fromRGB(0, 255, 255)
 
 local function applyGlow(object)
@@ -54,6 +55,10 @@ end)
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     
+    if input.KeyCode == Enum.KeyCode.One then
+        tweenEnabled = not tweenEnabled
+    end
+
     if input.KeyCode == Enum.KeyCode.C then
         cHeld = true
     end
@@ -112,7 +117,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
             if lHeld then
                 lockTarget = bestTarget
                 isLocked = true
-            else
+            elseif tweenEnabled then
                 local ti = TweenInfo.new(1.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, ti, {CFrame = bestTarget.CFrame + Vector3.new(0, 5, 0)})
                 
